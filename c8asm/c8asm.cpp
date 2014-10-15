@@ -9,12 +9,16 @@ c8asm::c8asm() {
 }
 
 void c8asm::markLabel(char *label) {
-    this->markLabel(label, 0);
+    this->markLabelAt(label, pc);
 }
 
 void c8asm::markLabel(char *label, int8_t offset) {
+    this->markLabelAt(label, pc+offset);
+}
+
+void c8asm::markLabelAt(char *label, uint16_t address) {
     std::string slabel(label);
-    labels[slabel] = pc+offset;
+    labels[slabel] = address;
 }
 
 void c8asm::dumpLabels() {
@@ -35,9 +39,12 @@ void c8asm::dumpBytes(char *filename) {
     for (int ii = 0; ii < instructions.size(); ++ii) {
         c8asm_instruction *inst = instructions[ii];
         uint8_t b1 = inst->byte1();
-        uint8_t b2 = inst->byte2();
         fwrite(&b1, sizeof(uint8_t), 1, fp);
-        fwrite(&b2, sizeof(uint8_t), 1, fp);
+
+        if (inst->hasSecondByte()) {
+            uint8_t b2 = inst->byte2();
+            fwrite(&b2, sizeof(uint8_t), 1, fp);
+        }
     }
 }
 
@@ -45,8 +52,13 @@ void c8asm::dumpReadableBytes() {
     uint16_t addr = 0;
     for (int ii = 0; ii < instructions.size(); ++ii) {
         c8asm_instruction *inst = instructions[ii];
-        printf("%02x %02x ; [%04x]\n", inst->byte1(), inst->byte2(), addr);
-        addr += 2;
+        if (inst->hasSecondByte()) {
+            printf("%02x %02x ; [%04x]\n", inst->byte1(), inst->byte2(), addr);
+            addr += 2;
+        } else {
+            printf("%02x   ; [%04x]\n", inst->byte1(), addr);
+            addr++;
+        }
     }
 }
 
@@ -74,6 +86,13 @@ void c8asm::addInstruction(uint8_t nib1, uint8_t nib2, uint8_t byte2) {
         (nib1 << 4) | nib2, byte2);
     instructions.push_back(ib);
     pc += 2;
+}
+
+void c8asm::addInstruction(uint8_t byte1) {
+    // kind-of an illegal instruction, but necessary for defining odd-byte sizes
+    c8asm_instruction_byte *ib = new c8asm_instruction_byte(byte1);
+    instructions.push_back(ib);
+    pc += 1;
 }
 
 void c8asm::addInstruction(uint8_t byte1, uint8_t byte2) {

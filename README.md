@@ -34,6 +34,7 @@ Here are some general rules:
 * hex numbers can be indicated with $ or 0x
 * you can define explicit bytes with .ds <byte1>, <byte2> in even number of bytes
 * .ds must be at the start of a line
+* you can store an address by NAME=address at the beggining of a line and use it like a label
 
 Assembly should be passed in and it takes an output file as a command line
 arg.  If that arg is "-t" then it will output human readable bytes instead.
@@ -42,7 +43,6 @@ Known bugs/issues:
 * allows multiple labels with the same name
 * no expression support
 * no binary support
-* .ds must be in pairs of two (requested by the docs)
 
 c8disasm: the disassembler
 --------------------------

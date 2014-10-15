@@ -15,6 +15,7 @@ extern uint8_t hex2dec(char h);
 ,                       return COMMA;
 \n                      return NEWLINE;
 ^[ \t]+                 return BEGINNING_WHITESPACE;
+=                       return EQUALS;
 
 ^[A-Za-z][A-Za-z0-9_]*:  {
     yylval.s = strndup(yytext, strlen(yytext)-1);

@@ -15,8 +15,10 @@ public:
     c8asm();
     void markLabel(char *label);
     void markLabel(char *label, int8_t offset);
+    void markLabelAt(char *label, uint16_t address);
     void addInstruction(uint8_t nib1, uint8_t nib2, uint8_t nib3, uint8_t nib4); 
     void addInstruction(uint8_t nib1, uint8_t nib2, uint8_t byte2);
+    void addInstruction(uint8_t byte1);
     void addInstruction(uint8_t byte1, uint8_t byte2);
     void addInstructionWithLabel(uint8_t nibble, char *label);
     uint16_t addrFromLabel(char *label);

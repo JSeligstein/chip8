@@ -9,8 +9,8 @@
 #include "portaudio.h"
 
 // take off _X to get opcode output
-#define C8_CYCLE_DEBUG_X
-#define C8_CYCLE_DEBUG_USLEEP (400 * 1000)
+#define C8_CYCLE_DEBUG
+#define C8_CYCLE_DEBUG_USLEEP_x (400 * 1000)
 
 // for portaudio
 #define SAMPLE_RATE (44100)

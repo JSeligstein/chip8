@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 %error-verbose
 
 /* generic tokens */
-%token <s> LABEL COMMA BEGINNING_WHITESPACE WORD NEWLINE COMMENT DEFINE_BYTE
+%token <s> LABEL COMMA BEGINNING_WHITESPACE WORD NEWLINE COMMENT DEFINE_BYTE EQUALS
 %token <i> NUMBER HEX1 HEX2 HEX3 HEX4
 
 /* instructions */
@@ -95,10 +95,14 @@ commands: /* empty */
         ;
 
 command:  eol
+        | BEGINNING_WHITESPACE eol
         | LABEL eol {
             c8asm::inst().markLabel($1);
         } | LABEL instruction eol {
             c8asm::inst().markLabel($1, -2);
+        } | WORD EQUALS address {
+            // a bit of a hack here - 0x200 gets added to every thing later
+            c8asm::inst().markLabelAt($1, $3-0x200);
         } | DEFINE_BYTE db_sequence eol {
         } | BEGINNING_WHITESPACE instruction eol {
         };
@@ -236,9 +240,10 @@ instruction:
     };
 
 db_sequence: 
-      db_sequence COMMA db_sequence
-    | byte COMMA byte {
-        c8asm::inst().addInstruction($1, $3);
+      byte {
+        c8asm::inst().addInstruction($1);
+    } | db_sequence COMMA byte {
+        c8asm::inst().addInstruction($3);
     };
 
 %%

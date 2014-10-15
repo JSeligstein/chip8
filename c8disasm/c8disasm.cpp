@@ -117,11 +117,11 @@ char *instr(unsigned char byte1, unsigned char byte2) {
             break;
         case 0x3:
             // 3xkk SE Vx, byte
-            sprintf(ret, "SE   v%1x, %02x", nib1, byte2);
+            sprintf(ret, "SE   v%1x, 0x%02x", nib1, byte2);
             break;
         case 0x4:
             // 4xkk SNE Vx, byte
-            sprintf(ret, "SNE  v%1x, %02x", nib1, byte2);
+            sprintf(ret, "SNE  v%1x, 0x%02x", nib1, byte2);
             break;
         case 0x5:
             // 5xy0 SE Vx, Vy
@@ -129,11 +129,11 @@ char *instr(unsigned char byte1, unsigned char byte2) {
             break;
         case 0x6:
             // 6xkk LD Vx, byte
-            sprintf(ret, "LD   v%1x, %02x", nib1, byte2);
+            sprintf(ret, "LD   v%1x, 0x%02x", nib1, byte2);
             break;
         case 0x7:
             // 7xkk ADD Vx, byte
-            sprintf(ret, "ADD  v%1x, %02x", nib1, byte2);
+            sprintf(ret, "ADD  v%1x, 0x%02x", nib1, byte2);
             break;
         case 0x8:
             switch (nib3) {
@@ -150,15 +150,16 @@ char *instr(unsigned char byte1, unsigned char byte2) {
                     sprintf(ret, "AND  v%1x, v%1x", nib1, nib2);
                     break;
                 case 0x3:
+                    // 8xy3 XOR Vx, Vy
                     sprintf(ret, "XOR  v%1x, v%1x", nib1, nib2);
                     break;
                 case 0x4:
                     // 8xy4 ADD Vx, Vy
-                    sprintf(ret, "ADC  v%1x, v%1x", nib1, nib2);
+                    sprintf(ret, "ADD  v%1x, v%1x", nib1, nib2);
                     break;
                 case 0x5:
                     // 8xy5 SUB Vx, Vy
-                    sprintf(ret, "SUBC v%1x, v%1x", nib1, nib2);
+                    sprintf(ret, "SUB v%1x, v%1x", nib1, nib2);
                     break;
                 case 0x6:
                     // 8xy6 SHR Vx {, Vy}
@@ -190,11 +191,11 @@ char *instr(unsigned char byte1, unsigned char byte2) {
             break;
         case 0xC:
             // Cxkk RND Vx, byte
-            sprintf(ret, "RND  v%1x, %02x", nib1, byte2);
+            sprintf(ret, "RND  v%1x, 0x%02x", nib1, byte2);
             break;
         case 0xD:
             // Dxyn DRW Vx, Vy, nibble
-            sprintf(ret, "DRW  v%1x, v%1x, %1x", nib1, nib2, nib3);
+            sprintf(ret, "DRW  v%1x, v%1x, 0x%1x", nib1, nib2, nib3);
             break;
         case 0xE:
             switch (byte2) {
@@ -254,15 +255,28 @@ char *instr(unsigned char byte1, unsigned char byte2) {
 
 int main(int argc, char **argv) {
 
-    if (argc == 1) {
-        printf("usage: %s <rom>\n", argv[0]);
+    if (argc < 2 || argc > 3) {
+        printf("usage: %s [-a] <rom>\n", argv[0]);
         return 1;
     }   
 
-    char *rom = argv[1];
+    char *rom;    
+    bool printAsm = false;
+    if (argc == 3) {
+        if (strncmp(argv[1], "-a", 2) == 0) {
+            rom = argv[2];
+            printAsm = true;
+        } else {
+            printf("usage: %s [-a] <rom>\n", argv[0]);
+            return 1;
+        }
+    } else {
+        rom = argv[1];
+    }
+
     unsigned char *memory = (unsigned char *)malloc(0xfff);
 
-    printf("Opening rom: %s... ", rom);
+    printf("; Opening rom: %s... ", rom);
     FILE *fp = fopen(rom, "rb");
     if (!fp) {
         printf("fail!\n");
@@ -282,18 +296,25 @@ int main(int argc, char **argv) {
     }
 
     // print code (pass 2)
-    for (size_t b = 0; b < rom_size; b += 2) {
+    for (size_t b = 0; b < 0xfff; b++) {
         uint16_t addr = b + 0x200;
-        uint8_t byte1 = memory[addr];
-        uint8_t byte2 = memory[addr+1];
-        printf("%02x %02x   ; [%03x]  %6s    %s\n", byte1, byte2, addr, label_str(addr), instr(byte1, byte2));
-    }
-
-    // print additional labels
-    for (size_t b = rom_size; b < 0xfff; b += 2) {
-        uint16_t addr = b + 0x200;
-        if (label_exists(addr)) {
-            printf("        ; [%03x]  %6s\n", addr, label_str(addr));
+        if (b % 2 == 0 && b < rom_size) {
+            uint8_t byte1 = memory[addr];
+            uint8_t byte2 = memory[addr+1];
+            if (printAsm) {
+                if (label_exists(addr)) {
+                    printf("%6s:\n", label_str(addr));
+                }
+                printf("    %s\n", instr(byte1, byte2));
+            } else {
+                printf("%02x %02x   ; [%03x]  %6s    %s\n", byte1, byte2, addr, label_str(addr), instr(byte1, byte2));
+            }
+        } else if (label_exists(addr)) {
+            if (printAsm) {
+                printf("%6s:\n", label_str(addr));
+            } else {
+                printf("        ; [%03x]  %6s\n", addr, label_str(addr));
+            }
         }
     }
 
