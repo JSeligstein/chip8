@@ -82,7 +82,11 @@ bool chip8_display::drawSprite(unsigned char *addr, uint8_t x, uint8_t y, uint8_
 
     for (int cy = 0; cy < n; cy++) {
         for (int cx = 0; cx < 8; cx++) {
-            pos = (cy+y) * w + (cx+x);
+
+            // if we wrapped around, don't drop down a line
+            pos = (cy+y) * w + ((cx+x) % w);
+
+            // if off the screen, forget it!
             if (pos >= (w*h)) {
                 continue;
             }
