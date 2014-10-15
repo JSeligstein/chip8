@@ -9,8 +9,8 @@
 #include "portaudio.h"
 
 // take off _X to get opcode output
-#define C8_CYCLE_DEBUG
-#define C8_CYCLE_DEBUG_USLEEP_x (400 * 1000)
+#define C8_CYCLE_DEBUG_X
+#define C8_CYCLE_DEBUG_USLEEP (100 * 1000)
 
 // for portaudio
 #define SAMPLE_RATE (44100)
@@ -315,14 +315,14 @@ void chip8::cycle() {
                     break;
                 case 0x55:
                     // Fx55 LD [I], Vx
-                    for (int curvx = 0; curvx < nib1; curvx++) {
+                    for (int curvx = 0; curvx <= nib1; curvx++) {
                         memory[ri+curvx] = vx[curvx];
                     }
                     executed = true;
                     break;
                 case 0x65:
                     // Fx65 LD Vx, [I]
-                    for (int curvx = 0; curvx < nib1; curvx++) {
+                    for (int curvx = 0; curvx <= nib1; curvx++) {
                         vx[curvx] = memory[ri+curvx];
                     }
                     executed = true;
