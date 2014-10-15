@@ -8,6 +8,9 @@
 #include <functional>
 #include "portaudio.h"
 
+// game delay
+#define C8_CYCLE_DELAY (350)
+
 // take off _X to get opcode output
 #define C8_CYCLE_DEBUG_X
 #define C8_CYCLE_DEBUG_USLEEP (100 * 1000)
@@ -356,6 +359,7 @@ void chip8::run() {
 
     while (1) {
         cycle();
+        usleep(C8_CYCLE_DELAY);
     }
 }
 
