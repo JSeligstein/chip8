@@ -44,14 +44,11 @@ Known bugs/issues:
 * no binary support
 * .ds must be in pairs of two (requested by the docs)
 
-
 c8disasm: the disassembler
 --------------------------
 Given a compiled binary, this will output a reasonable readable code output
 
 Known bugs/issues:
-* if a location has multiple labels, only one is outputted and the others
-        are just missing
 * if a label is referred to but isn't an even byte number, it won't get 
         displayed.  (this generally is a bad idea here anyway)
 * it is quite hard/impossible to decipher a .ds instruction, so some

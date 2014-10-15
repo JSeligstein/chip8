@@ -30,8 +30,8 @@ Kernel configured for up to 4 processors.
 Processor type: x86_64h (Intel x86-64h Haswell)
 Processors active: 0 1 2 3
 Primary memory available: 8.00 gigabytes
-Default processor set: 242 tasks, 999 threads, 4 processors
-Load average: 3.44, Mach factor: 1.18
+Default processor set: 257 tasks, 1081 threads, 4 processors
+Load average: 2.33, Mach factor: 1.69
 /bin/machine           = unknown
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
@@ -852,7 +852,7 @@ configure:15730: checking for clock_gettime
 configure:15730: gcc -o conftest -g -O2   conftest.c  >&5
 Undefined symbols for architecture x86_64:
   "_clock_gettime", referenced from:
-      _main in conftest-1d7bde.o
+      _main in conftest-8d1301.o
 ld: symbol(s) not found for architecture x86_64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 configure:15730: $? = 1

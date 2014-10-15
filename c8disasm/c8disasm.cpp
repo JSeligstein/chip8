@@ -2,23 +2,37 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <vector>
+#include <string>
+#include <map>
 
 using namespace std;
 
-vector<uint16_t> labels;
+map<uint16_t, uint16_t> labels;
+
+bool label_exists(uint16_t addr) {
+    map<uint16_t, uint16_t>::iterator iter = labels.find(addr);
+    return iter != labels.end();
+}
 
 char *label_str(uint16_t addr) {
     char *ret = (char *)malloc(sizeof(char) * 6);
-    for (int ll = 0; ll < labels.size(); ll++) {
-        if (labels[ll] == addr) {
-            sprintf(ret, "LBL%03d", ll);
-            return ret;
-        }
+    map<uint16_t, uint16_t>::iterator iter = labels.find(addr);
+    if (iter == labels.end()) {
+        sprintf(ret, "      ");
+    } else {
+        sprintf(ret, "LBL%03d", iter->second);
     }
-    sprintf(ret, "      ");
     return ret;
+}
+
+void label_insert(uint16_t addr) {
+    static uint16_t labelNumber = 0;
+    if (labels.find(addr) != labels.end()) {
+        return;
+    }
+
+    labels[addr] = labelNumber;
+    labelNumber++;
 }
 
 void label(unsigned char byte1, unsigned char byte2) {
@@ -38,28 +52,28 @@ void label(unsigned char byte1, unsigned char byte2) {
             } else {
                 // 0nnn SYS addr
                 addr = (nib1 << 8) | byte2;
-                labels.push_back(addr);
+                label_insert(addr);
                 break;
             }
         case 0x1:
             // 1nnn JP addr
             addr = (nib1 << 8) | byte2;
-            labels.push_back(addr);
+            label_insert(addr);
             break;
         case 0x2:
             // 2nnn CALL addr
             addr = (nib1 << 8) | byte2;
-            labels.push_back(addr);
+            label_insert(addr);
             break;
         case 0xA:
             // Annn LD I, addr
             addr = (nib1 << 8) | byte2;
-            labels.push_back(addr);
+            label_insert(addr);
             break;
         case 0xB:
             // Bnnn JP V0, addr
             addr = ((nib1 << 8) | byte2);
-            labels.push_back(addr);
+            label_insert(addr);
             break;
     }
 }
@@ -254,7 +268,7 @@ int main(int argc, char **argv) {
         printf("fail!\n");
         return false;
     }
-    size_t rom_size = fread(&memory[0x200], 1, 0xff, fp);
+    size_t rom_size = fread(&memory[0x200], 1, 0xfff, fp);
     fclose(fp);
 
     printf("ok\n\n");
@@ -272,8 +286,15 @@ int main(int argc, char **argv) {
         uint16_t addr = b + 0x200;
         uint8_t byte1 = memory[addr];
         uint8_t byte2 = memory[addr+1];
+        printf("%02x %02x   ; [%03x]  %6s    %s\n", byte1, byte2, addr, label_str(addr), instr(byte1, byte2));
+    }
 
-        printf("%02x %02x   ; [%03x] %6s  %s\n", byte1, byte2, addr, label_str(addr), instr(byte1, byte2));
+    // print additional labels
+    for (size_t b = rom_size; b < 0xfff; b += 2) {
+        uint16_t addr = b + 0x200;
+        if (label_exists(addr)) {
+            printf("        ; [%03x]  %6s\n", addr, label_str(addr));
+        }
     }
 
     return 0;

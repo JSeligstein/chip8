@@ -10,7 +10,7 @@
 
 // take off _X to get opcode output
 #define C8_CYCLE_DEBUG_X
-#define C8_CYCLE_DEBUG_USLEEP (20 * 1000)
+#define C8_CYCLE_DEBUG_USLEEP (400 * 1000)
 
 // for portaudio
 #define SAMPLE_RATE (44100)
@@ -48,7 +48,7 @@ bool chip8::loadRom(char *filename) {
         printf("fail!\n");
         return false;
     }
-    fread(&memory[0x200], 1, 0xff, fp);
+    fread(&memory[0x200], 1, 0xfff, fp);
     fclose(fp);
 
     this->filename = filename;
