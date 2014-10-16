@@ -9,7 +9,7 @@
 #include "portaudio.h"
 
 // game delay
-#define C8_CYCLE_DELAY (350)
+#define C8_CYCLE_DELAY (150)
 
 // take off _X to get opcode output
 #define C8_CYCLE_DEBUG_X

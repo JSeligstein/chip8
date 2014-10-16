@@ -4,6 +4,23 @@
 #include <stdio.h>
 #include "chip8_display.hpp"
 
+/**
+ * Keys are in 0-F indexes, but will be laid out in this fashion:
+ *
+ *  1 2 3 C
+ *  4 5 6 D
+ *  7 8 9 E
+ *  A 0 B F
+ *
+ */
+
+const unsigned int chip8_display_keymap[16] = {
+    cimg::keyB, cimg::key4, cimg::key5, cimg::key6,
+    cimg::keyR, cimg::keyT, cimg::keyY, cimg::keyF,
+    cimg::keyG, cimg::keyH, cimg::keyV, cimg::keyN,
+    cimg::key7, cimg::keyU, cimg::keyJ, cimg::keyM,
+};
+
 chip8_display::chip8_display() {
     this->w = 64;
     this->h = 32;
@@ -30,46 +47,19 @@ void chip8_display::clear() {
 }
 
 bool chip8_display::keyPressed(uint8_t key) {
-    switch (key) {
-        case 0x0: return this->cdisplay->is_key0();
-        case 0x1: return this->cdisplay->is_key1();
-        case 0x2: return this->cdisplay->is_key2();
-        case 0x3: return this->cdisplay->is_key3();
-        case 0x4: return this->cdisplay->is_key4();
-        case 0x5: return this->cdisplay->is_key5();
-        case 0x6: return this->cdisplay->is_key6();
-        case 0x7: return this->cdisplay->is_key7();
-        case 0x8: return this->cdisplay->is_key8();
-        case 0x9: return this->cdisplay->is_key9();
-        case 0xA: return this->cdisplay->is_keyA();
-        case 0xB: return this->cdisplay->is_keyB();
-        case 0xC: return this->cdisplay->is_keyC();
-        case 0xD: return this->cdisplay->is_keyD();
-        case 0xE: return this->cdisplay->is_keyE();
-        case 0xF: return this->cdisplay->is_keyF();
+    if (key >= 0 && key <= 15) {
+        return this->cdisplay->is_key(chip8_display_keymap[key]);
     }
-    
     return false;
 }
 
 uint8_t chip8_display::waitForKey() {
     while (!this->cdisplay->is_closed()) {
-        if (this->cdisplay->is_key0()) return 0x0;
-        if (this->cdisplay->is_key1()) return 0x1;
-        if (this->cdisplay->is_key2()) return 0x2;
-        if (this->cdisplay->is_key3()) return 0x3;
-        if (this->cdisplay->is_key4()) return 0x4;
-        if (this->cdisplay->is_key5()) return 0x5;
-        if (this->cdisplay->is_key6()) return 0x6;
-        if (this->cdisplay->is_key7()) return 0x7;
-        if (this->cdisplay->is_key8()) return 0x8;
-        if (this->cdisplay->is_key9()) return 0x9;
-        if (this->cdisplay->is_keyA()) return 0xA;
-        if (this->cdisplay->is_keyB()) return 0xB;
-        if (this->cdisplay->is_keyC()) return 0xC;
-        if (this->cdisplay->is_keyD()) return 0xD;
-        if (this->cdisplay->is_keyE()) return 0xE;
-        if (this->cdisplay->is_keyF()) return 0xF;
+        for (int kk = 0; kk < 16; kk++) {
+            if (this->cdisplay->is_key(chip8_display_keymap[kk])) {
+                return kk;
+            }
+        }
         this->cdisplay->wait();
     }
     return 0;
