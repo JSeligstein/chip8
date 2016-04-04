@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
 %token <s> INSTR_JP   INSTR_LD   INSTR_OR   INSTR_RET  INSTR_RND
 %token <s> INSTR_SE   INSTR_SHL  INSTR_SHR  INSTR_SKNP INSTR_SKP
 %token <s> INSTR_SNE  INSTR_SYS  INSTR_SUB  INSTR_SUBN INSTR_XOR
+%token <s> INSTR_PRINT
 
 /* registers and values*/
 %token <s> RI ST DT BCD KEY FONT RI_INDIRECT
@@ -235,6 +236,8 @@ instruction:
         c8asm::inst().addInstruction(0x8, hex2dec($2), hex2dec($4), 0x7);
     } | INSTR_XOR VX COMMA VX {
         c8asm::inst().addInstruction(0x8, hex2dec($2), hex2dec($4), 0x3);
+    } | INSTR_PRINT {
+        c8asm::inst().addInstruction(0, 0xFF);
     } | WORD {
         printf("Invalid instruction: %s\n", $1);
     };

@@ -63,6 +63,7 @@ extern uint8_t hex2dec(char h);
 (?i:f)        return FONT;
 
 (?i:\.db)     return DEFINE_BYTE;
+(?i:print)    return INSTR_PRINT;
   
 ((0x)|\$)[0-9A-Fa-f] {
     int idx = yytext[0] == '$' ? 1 : 2;

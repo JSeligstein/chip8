@@ -13,7 +13,16 @@
 
 // take off _X to get opcode output
 #define C8_CYCLE_DEBUG_X
-#define C8_CYCLE_DEBUG_USLEEP (100 * 1000)
+#define C8_CYCLE_DEBUG_USLEEP (10 * 1000)
+
+#define DEBUG_PRINT \
+    printf("cycle [%03x] %02x %02x", pc, byte1, byte2); \
+    printf(", ri: %03x, dt: %02x, sp: %02x", ri, dt, sp); \
+    printf(", vx: "); \
+    for(int vv = 0; vv < 16; vv++) { \
+        printf("%02x ", vx[vv]); \
+    } \
+    printf("\n");
 
 // for portaudio
 #define SAMPLE_RATE (44100)
@@ -77,13 +86,7 @@ void chip8::cycle() {
     nib3 = (byte2 & 0x0f);
 
 #ifdef C8_CYCLE_DEBUG
-    printf("cycle [%03x] %02x %02x", pc, byte1, byte2);
-    printf(", ri: %03x, dt: %02x, sp: %02x", ri, dt, sp);
-    printf(", vx: ");
-    for(int vv = 0; vv < 16; vv++) {
-        printf("%02x ", vx[vv]);
-    }
-    printf("\n");
+    DEBUG_PRINT
 #ifdef C8_CYCLE_DEBUG_USLEEP
     usleep(C8_CYCLE_DEBUG_USLEEP);
 #endif
@@ -102,6 +105,11 @@ void chip8::cycle() {
                 // 00EE RET
                 pc = stack[sp];
                 sp--;
+                executed = true;
+            } else if (byte1 == 0 && byte2 == 0xFF) {
+                // 00FF PRINT
+                // defined by me
+                DEBUG_PRINT
                 executed = true;
             } else {
                 // 0nnn SYS addr
